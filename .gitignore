@@ -1,0 +1,17 @@
+# Files
+.env*
+
+# Folders
+cache/
+out/
+cmake-build-debug/
+
+# Binaries
+*.exe
+*.deb
+*.dmg
+
+# Others
+.idea/
+.fleet/
+
