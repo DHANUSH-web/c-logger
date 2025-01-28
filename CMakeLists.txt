@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
-project(ModularC C)
-include_directories("custom")
+project(c-logger C)
+include_directories("logger")
 set(CMAKE_C_STANDARD 11)
 
-add_executable(ModularC main.c
-    custom/logger.h
+add_executable(clogger main.c
+    logger/logger.h
 )
