@@ -6,9 +6,9 @@
 #include <logger.h>
 
 int main(const int argc, char *argv[]) {
-    const char* root_dir = "C:/Users/DV7187/CLionProjects/ModularC/cache";
-    const char* file_name = "test_logger.log";
-    const struct LOGGER logger = INIT_LOGGER(root_dir, file_name, FALSE);
+    const char* root_dir = "";    // Insert absolute path of project root ex:/home/.../cache
+    const char* file_name = "";   // Insert the file name of log file ex: test_logger.log
+    const struct LOGGER logger = INIT_LOGGER(root_dir, file_name, TRUE);
 
     LOG(logger, "Error log", ERROR, FALSE);
     LOG(logger, "Info log", INFO, FALSE);
