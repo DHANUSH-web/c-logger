@@ -15,7 +15,7 @@ fi
 # Create fresh the build directory
 mkdir -p $BUILD_DIR
 
-# Change the diretory to build directory
+# Change the directory to build directory
 cd $BUILD_DIR
 
 # Compile the project with cmake
