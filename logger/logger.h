@@ -92,6 +92,15 @@ static time_t   GET_LOGGER_START_TIME(struct LOGGER logger);
 static time_t   GET_LOGGER_END_TIME(struct LOGGER logger);
 static void     EXIT_LOGGER(struct LOGGER logger);
 static char*    GET_CURRENT_DATE_TIME();
+static void     REGISTER_LOGGER(struct LOGGER logger);
+static void     UNREGISTER_LOGGER(struct LOGGER logger);
+static void     UNREGISTER_ALL_LOGGERS();
+static BOOL     IS_LOGGER_REGISTERED(struct LOGGER logger);
+
+// Logger buffer manager
+static struct   LOGGER BUFFERS[sizeof(struct LOGGER) * 100];
+static int      BUFFER_COUNT;
+static int      BUFFER_SIZE;
 
 // Define a logger instance
 static struct LOGGER INIT_LOGGER(const char* root_dir, const char* file_name, const BOOL debug) {
@@ -138,6 +147,9 @@ static struct LOGGER INIT_LOGGER(const char* root_dir, const char* file_name, co
 
     fprintf(logger.file, ">>> Logger initiated at %s <<<\n", GET_CURRENT_DATE_TIME());
     printf("%s>>> Logger initiated at %s <<< %s\n", CYAN, GET_CURRENT_DATE_TIME(), RESET);
+
+    // Register the logger to BUF_MANAGER
+    REGISTER_LOGGER(logger);
     return logger;
 };
 
@@ -246,7 +258,8 @@ static void EXIT_LOGGER(struct LOGGER logger) {
         ctime(&logger.end_time);
         fprintf(logger.file, ">>> Logger exited at %s <<<\n", GET_CURRENT_DATE_TIME());
         printf("%s>>> Logger exited at %s <<<%s\n", CYAN, GET_CURRENT_DATE_TIME(), RESET);
-				fclose(logger.file);
+        UNREGISTER_LOGGER(logger);      // unregister logger from buffer manager
+        fclose(logger.file);
         logger.file = NULL;
     } else {
         printf("%s>>> Logger not initialized <<<%s\n", RED, RESET);
@@ -257,13 +270,91 @@ static void EXIT_LOGGER(struct LOGGER logger) {
 static char* GET_CURRENT_DATE_TIME() {
     char* buf = (char*)malloc(sizeof(char) + 100);
     time_t current_time;
-    struct tm *local_time;
 
     time(&current_time);
-    local_time = localtime(&current_time);
+    const struct tm *local_time = localtime(&current_time);
     strftime(buf, 100, "%d-%m-%Y %H:%M:%S", local_time);
 
     return buf;
+}
+
+// Check if the logger has already registered to the register
+static BOOL IS_LOGGER_REGISTERED(const struct LOGGER logger) {
+    for (int i = 0; i < BUFFER_COUNT / 2; i++)
+        if ((BUFFERS[i].file_name != NULL && strcmp(BUFFERS[i].file_name, logger.file_name) == 0) ||
+            (BUFFERS[BUFFER_COUNT-i-1].file_name != NULL && strcmp(BUFFERS[BUFFER_COUNT-i-1].file_name, logger.file_name) == 0)) {
+            return TRUE;
+        }
+
+    return FALSE;
+}
+
+// Register the Logger buffer
+static void REGISTER_LOGGER(const struct LOGGER logger) {
+    // check if the buffer already exists in the register
+    if (!IS_LOGGER_REGISTERED(logger)) {
+        BUFFERS[BUFFER_COUNT++] = logger;
+        BUFFER_SIZE++;
+        PRINT_LOG("[BUF_MANAGER]: Logger has been registered to BUF_MANAGER", DEBUG);
+        return;
+    }
+
+    PRINT_LOG("[BUF_MANAGER]: Logger is already registered with BUF_MANAGER", ERROR);
+}
+
+// Unregister the logger from buffer manager
+static void UNREGISTER_LOGGER(const struct LOGGER logger) {
+    // figure out the position of the logger to be removed
+    int position = -1;
+
+    // Avoid looping if the only one logger is registered
+    if (BUFFER_COUNT == 1 && strcmp(BUFFERS[0].file_name, logger.file_name) == 0) {
+        BUFFERS[0].file_name = NULL;
+        BUFFER_SIZE--;
+        PRINT_LOG("[BUF_MANAGER]: Logger was unregistered successfully", DEBUG);
+        return;
+    }
+
+    for (int i = 0; i <= BUFFER_COUNT / 2; i++) {
+        if (BUFFERS[i].file_name != NULL && strcmp(BUFFERS[i].file_name, logger.file_name) == 0) {
+            position = i;
+            break;
+        }
+
+        if (BUFFERS[BUFFER_COUNT-i-1].file_name != NULL && strcmp(BUFFERS[BUFFER_COUNT-i-1].file_name, logger.file_name) == 0) {
+            position = BUFFER_COUNT-i-1;
+            break;
+        }
+    }
+
+    if (position == -1) {
+        PRINT_LOG("[BUF_MANAGER]: Failed to unregister the logger, could not be found in the existing register", ERROR);
+        return;
+    }
+
+    // unregister the logger
+    BUFFERS[position].file_name = NULL;
+    BUFFER_SIZE--;
+    PRINT_LOG("[BUF_MANAGER]: Logger was unregistered successfully", DEBUG);
+}
+
+// Unregister all the running loggers
+static void UNREGISTER_ALL_LOGGERS() {
+    for (int i = 0; i < BUFFER_COUNT / 2; i++) {
+        if (BUFFERS[i].file_name != NULL) {
+            BUFFERS[i].file_name = NULL;
+            EXIT_LOGGER(BUFFERS[i]);
+            BUFFER_SIZE--;
+            PRINT_LOG("[BUF_MANAGER]: Unregistered logger successfully", DEBUG);
+        }
+
+        if (BUFFERS[BUFFER_COUNT-i-1].file_name != NULL) {
+            BUFFERS[BUFFER_COUNT-i-1].file_name = NULL;
+            EXIT_LOGGER(BUFFERS[BUFFER_COUNT-i-1]);
+            BUFFER_SIZE--;
+            PRINT_LOG("[BUF_MANAGER]: Unregistered logger successfully", DEBUG);
+        }
+    }
 }
 
 #endif //LOGGER_H
