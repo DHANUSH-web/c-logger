@@ -24,11 +24,11 @@ REM Compile the project with CMake gcc and g++ compilers
 REM Build the Makefile
 %MAKE%
 
-REM Execute the final binary
-%EXECUTABLE%
-
 REM Remove the final binary once executed
 cd ..
+
+REM Execute the final binary
+"./%BUILD_DIR%/%EXECUTABLE%"
 
 REM Print the final success message for little nerd happyness after hours of grinding :)
 echo "You did it nerd.. Congrats!! Now go and have a break buddy :)"
