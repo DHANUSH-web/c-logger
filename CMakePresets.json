@@ -6,7 +6,7 @@
             "hidden": false,
             "description": "Default Project Configuration",
             "generator": "MinGW Makefiles",
-            "binaryDir": "${workspaceFolder}/out",
+            "binaryDir": "${sourceDir}/out",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
