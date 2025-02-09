@@ -2,9 +2,9 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "default",
+            "name": "CLogger",
             "hidden": false,
-            "description": "Default Project Configuration",
+            "description": "CLogger Project Configuration",
             "generator": "MinGW Makefiles",
             "binaryDir": "${sourceDir}/out",
             "cacheVariables": {
