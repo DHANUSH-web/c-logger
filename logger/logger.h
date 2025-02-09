@@ -15,7 +15,7 @@
 #include <time.h>
 
 // Handle file system based on platform
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef _WIN32
 #include <direct.h>
 #define MKDIR(path) _mkdir(path)
 #else

@@ -5,6 +5,13 @@
 
 #include <logger.h>
 
+// Handle file system for specific platform
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
+
 int main(const int argc, char *argv[]) {
     char *root_dir          = getcwd(NULL, 100);    // Insert absolute path of project root ex:/home/.../cache
     const char* file_name   = "test_logger.log";    // Insert the file name of log file ex: test_logger.log
