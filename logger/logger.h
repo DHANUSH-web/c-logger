@@ -12,8 +12,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <time.h>
+
+// Handle file system based on platform
+#if defined(_WIN32) || defined(_WIN64)
+#include <direct.h>
+#define MKDIR(path) _mkdir(path)
+#else
+#include <sys/stat.h>
+#define MKDIR(path) mkdir(path, 0777)
+#endif
 
 // Define boolean types
 typedef enum {
@@ -115,7 +123,7 @@ static struct LOGGER INIT_LOGGER(const char* root_dir, const char* file_name, co
     strcat(log_file, file_name);
 
     // create the root directory
-    mkdir(root_dir);
+    MKDIR(root_dir);
 
     const struct LOGGER logger = {
         .root_dir   = root_dir,
