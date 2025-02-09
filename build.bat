@@ -3,10 +3,10 @@
 REM Set the path variables
 set BUILD_DIR=out
 set EXECUTABLE="clogger.exe"
-set GCC="C:/msys64/ucrt64/bin/gcc.exe"
-set G++="C:/msys64/ucrt64/bin/g++.exe"
-set CMAKE="D:/CMake/bin/cmake.exe"
-set MAKE="C:/msys64/mingw64/bin/make.exe"
+set GCC="gcc.exe"
+set G++="g++.exe"
+set CMAKE="cmake.exe"
+set MAKE="make.exe"
 set GENERATOR="MinGW Makefiles"
 
 REM Remove old cache folders
