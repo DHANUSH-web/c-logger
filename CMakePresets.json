@@ -2,10 +2,21 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "CLogger",
+            "name": "clogger-win32",
             "hidden": false,
-            "description": "CLogger Project Configuration",
+            "description": "CLogger Project Configuration for Windows System",
             "generator": "MinGW Makefiles",
+            "binaryDir": "${sourceDir}/out",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+            }
+        },
+        {
+            "name": "clogger-unix",
+            "hidden": false,
+            "description": "CLogger Project Configuration for Unix System",
+            "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/out",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
