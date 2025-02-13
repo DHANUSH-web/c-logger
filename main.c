@@ -3,7 +3,7 @@
  * pull requests at https://github.com/DHANUSH-web/cmod-cli/pulls#
  */
 
-#include <logger.h>
+#include "logger.h"
 
 // Handle file system for specific platform
 #ifdef _WIN32

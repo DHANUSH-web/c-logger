@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
-project(c-logger C)
-include_directories("logger")
+project(c-logger VERSION 0.1.0 LANGUAGES C CXX)
+# include_directories("logger")
 set(CMAKE_C_STANDARD 11)
 
 add_executable(clogger main.c
-    logger/logger.h
+    logger.h
 )
