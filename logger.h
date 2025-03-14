@@ -76,6 +76,7 @@ struct LVL_HANDLER {
 
 // create logger instance
 struct LOGGER {
+    const char*         name;
     const char*         root_dir;
     const char*         file_name;
     FILE*               file;
@@ -88,7 +89,7 @@ struct LOGGER {
 };
 
 // Declare all the methods of logger
-static struct   LOGGER INIT_LOGGER(const char* root_dir, const char* file_name, BOOL debug);
+static struct   LOGGER INIT_LOGGER(const char* name, const char* root_dir, const char* file_name, BOOL debug);
 static BOOL     IS_LOGGER_ACTIVE(struct LOGGER logger);
 static void     LOG(struct LOGGER logger, const char* message, enum LEVEL level, BOOL debug_once);
 static void     PRINT_LOG(const char* message, enum LEVEL level);
@@ -111,7 +112,7 @@ static int      BUFFER_COUNT;
 static int      BUFFER_SIZE;
 
 // Define a logger instance
-static struct LOGGER INIT_LOGGER(const char* root_dir, const char* file_name, const BOOL debug) {
+static struct LOGGER INIT_LOGGER(const char* name, const char* root_dir, const char* file_name, const BOOL debug) {
     // Get the absolute path of logger
     char log_file[100] = "";
     strcat(log_file, root_dir);
@@ -126,6 +127,7 @@ static struct LOGGER INIT_LOGGER(const char* root_dir, const char* file_name, co
     MKDIR(root_dir);
 
     const struct LOGGER logger = {
+        .name       = name,
         .root_dir   = root_dir,
         .file_name  = file_name,
         .start_time = time(NULL),
@@ -153,8 +155,8 @@ static struct LOGGER INIT_LOGGER(const char* root_dir, const char* file_name, co
     // update the logger initialization time
     ctime(&logger.start_time);
 
-    fprintf(logger.file, ">>> Logger initiated at %s <<<\n", GET_CURRENT_DATE_TIME());
-    printf("%s>>> Logger initiated at %s <<< %s\n", CYAN, GET_CURRENT_DATE_TIME(), RESET);
+    fprintf(logger.file, ">>> Logger %s initiated at %s <<<\n", name, GET_CURRENT_DATE_TIME());
+    printf("%s>>> Logger %s initiated at %s <<< %s\n", CYAN, name, GET_CURRENT_DATE_TIME(), RESET);
 
     // Register the logger to BUF_MANAGER
     REGISTER_LOGGER(logger);
@@ -264,13 +266,13 @@ static time_t GET_LOGGER_END_TIME(const struct LOGGER logger) {
 static void EXIT_LOGGER(struct LOGGER logger) {
     if (IS_LOGGER_ACTIVE(logger)) {
         ctime(&logger.end_time);
-        fprintf(logger.file, ">>> Logger exited at %s <<<\n", GET_CURRENT_DATE_TIME());
-        printf("%s>>> Logger exited at %s <<<%s\n", CYAN, GET_CURRENT_DATE_TIME(), RESET);
+        fprintf(logger.file, ">>> Logger %s exited at %s <<<\n", logger.name, GET_CURRENT_DATE_TIME());
+        printf("%s>>> Logger %s exited at %s <<<%s\n", CYAN, logger.name, GET_CURRENT_DATE_TIME(), RESET);
         UNREGISTER_LOGGER(logger);      // unregister logger from buffer manager
         fclose(logger.file);
         logger.file = NULL;
     } else {
-        printf("%s>>> Logger not initialized <<<%s\n", RED, RESET);
+        printf("%s>>> Logger %s not initialized <<<%s\n", RED, logger.name, RESET);
     }
 }
 

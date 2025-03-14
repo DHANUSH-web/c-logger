@@ -13,11 +13,12 @@
 #endif
 
 int main(const int argc, char *argv[]) {
+    const char* app_name    = "app";
     char *root_dir          = getcwd(NULL, 100);    // Insert absolute path of project root ex:/home/.../cache
     const char* file_name   = "test_logger.log";    // Insert the file name of log file ex: test_logger.log
 
     strcat(root_dir, "/cache"); // Append logs directory to root directory
-    const struct LOGGER logger  = INIT_LOGGER(root_dir, file_name, TRUE);
+    const struct LOGGER logger  = INIT_LOGGER(app_name, root_dir, file_name, TRUE);
 
     /*
         LOG method includes following parameters which can't be ignored in C
