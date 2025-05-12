@@ -18,7 +18,7 @@ int main(const int argc, char *argv[]) {
     const char* file_name   = "test_logger.log";    // Insert the file name of log file ex: test_logger.log
 
     strcat(root_dir, "/cache"); // Append logs directory to root directory
-    const struct LOGGER logger  = INIT_LOGGER(app_name, root_dir, file_name, TRUE);
+    struct LOGGER logger  = INIT_LOGGER(app_name, root_dir, file_name, TRUE);
 
     /*
         LOG method includes following parameters which can't be ignored in C
@@ -35,6 +35,6 @@ int main(const int argc, char *argv[]) {
     LOG(logger, "Message log",  INFO,       FALSE);
     LOG(logger, "Unknown log",  UNKNOWN,    FALSE);
 
-    EXIT_LOGGER(logger);
+    EXIT_LOGGER(&logger);
     return 0;
 }

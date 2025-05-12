@@ -99,7 +99,7 @@ static char*    GET_LOGGER_LEVEL_STRING(enum LEVEL level);
 static void     DISPLAY_LOGGER_LEVELS(struct LOGGER logger);
 static time_t   GET_LOGGER_START_TIME(struct LOGGER logger);
 static time_t   GET_LOGGER_END_TIME(struct LOGGER logger);
-static void     EXIT_LOGGER(struct LOGGER logger);
+static void     EXIT_LOGGER(struct LOGGER* logger);
 static char*    GET_CURRENT_DATE_TIME();
 static void     REGISTER_LOGGER(struct LOGGER logger);
 static void     UNREGISTER_LOGGER(struct LOGGER logger);
@@ -263,16 +263,16 @@ static time_t GET_LOGGER_END_TIME(const struct LOGGER logger) {
 }
 
 // exit the logger
-static void EXIT_LOGGER(struct LOGGER logger) {
-    if (IS_LOGGER_ACTIVE(logger)) {
-        ctime(&logger.end_time);
-        fprintf(logger.file, ">>> Logger %s exited at %s <<<\n", logger.name, GET_CURRENT_DATE_TIME());
-        printf("%s>>> Logger %s exited at %s <<<%s\n", CYAN, logger.name, GET_CURRENT_DATE_TIME(), RESET);
-        UNREGISTER_LOGGER(logger);      // unregister logger from buffer manager
-        fclose(logger.file);
-        logger.file = NULL;
+static void EXIT_LOGGER(struct LOGGER* logger) {
+    if (IS_LOGGER_ACTIVE(*logger)) {
+        ctime(&logger->end_time);
+        fprintf(logger->file, ">>> Logger %s exited at %s <<<\n", logger->name, GET_CURRENT_DATE_TIME());
+        printf("%s>>> Logger %s exited at %s <<<%s\n", CYAN, logger->name, GET_CURRENT_DATE_TIME(), RESET);
+        UNREGISTER_LOGGER(*logger);      // unregister logger from buffer manager
+        fclose(logger->file);
+        logger->file = NULL;
     } else {
-        printf("%s>>> Logger %s not initialized <<<%s\n", RED, logger.name, RESET);
+        printf("%s>>> Logger %s not initialized <<<%s\n", RED, logger->name, RESET);
     }
 }
 
@@ -353,14 +353,14 @@ static void UNREGISTER_ALL_LOGGERS() {
     for (int i = 0; i < BUFFER_COUNT / 2; i++) {
         if (BUFFERS[i].file_name != NULL) {
             BUFFERS[i].file_name = NULL;
-            EXIT_LOGGER(BUFFERS[i]);
+            EXIT_LOGGER(&BUFFERS[i]);
             BUFFER_SIZE--;
             PRINT_LOG("[BUF_MANAGER]: Unregistered logger successfully", DEBUG);
         }
 
         if (BUFFERS[BUFFER_COUNT-i-1].file_name != NULL) {
             BUFFERS[BUFFER_COUNT-i-1].file_name = NULL;
-            EXIT_LOGGER(BUFFERS[BUFFER_COUNT-i-1]);
+            EXIT_LOGGER(&BUFFERS[BUFFER_COUNT-i-1]);
             BUFFER_SIZE--;
             PRINT_LOG("[BUF_MANAGER]: Unregistered logger successfully", DEBUG);
         }
