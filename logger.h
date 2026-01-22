@@ -89,39 +89,34 @@ struct LOGGER {
 };
 
 // Declare all the methods of logger
-static struct   LOGGER INIT_LOGGER(const char* name, const char* root_dir, const char* file_name, BOOL debug);
-static BOOL     IS_LOGGER_ACTIVE(struct LOGGER logger);
-static void     LOG(struct LOGGER logger, const char* message, enum LEVEL level, BOOL debug_once);
-static void     PRINT_LOG(const char* message, enum LEVEL level);
-static int      GET_LOGGER_LOG_COUNT(struct LOGGER logger);
-static int      GET_LOGGER_LEVEL_COUNT(struct LOGGER logger, enum LEVEL level);
-static char*    GET_LOGGER_LEVEL_STRING(enum LEVEL level);
-static void     DISPLAY_LOGGER_LEVELS(struct LOGGER logger);
-static time_t   GET_LOGGER_START_TIME(struct LOGGER logger);
-static time_t   GET_LOGGER_END_TIME(struct LOGGER logger);
-static void     EXIT_LOGGER(struct LOGGER* logger);
-static char*    GET_CURRENT_DATE_TIME();
-static void     REGISTER_LOGGER(struct LOGGER logger);
-static void     UNREGISTER_LOGGER(struct LOGGER logger);
-static void     UNREGISTER_ALL_LOGGERS();
-static BOOL     IS_LOGGER_REGISTERED(struct LOGGER logger);
+static inline struct LOGGER INIT_LOGGER(const char* name, const char* root_dir, const char* file_name, BOOL debug);
+static inline BOOL     IS_LOGGER_ACTIVE(const struct LOGGER* logger);
+static inline void     LOG(struct LOGGER* logger, const char* message, enum LEVEL level, BOOL debug_once);
+static inline void     PRINT_LOG(const char* message, enum LEVEL level);
+static inline void     PRINT_LOG_WITH_TIME(const char* message, enum LEVEL level, const char* time_buf);
+static inline int      GET_LOGGER_LOG_COUNT(const struct LOGGER* logger);
+static inline int      GET_LOGGER_LEVEL_COUNT(const struct LOGGER* logger, enum LEVEL level);
+static inline char*    GET_LOGGER_LEVEL_STRING(enum LEVEL level);
+static inline void     DISPLAY_LOGGER_LEVELS(const struct LOGGER* logger);
+static inline time_t   GET_LOGGER_START_TIME(const struct LOGGER* logger);
+static inline time_t   GET_LOGGER_END_TIME(const struct LOGGER* logger);
+static inline void     EXIT_LOGGER(struct LOGGER* logger);
+static inline void     GET_CURRENT_DATE_TIME(char* buf, size_t size);
+static inline void     REGISTER_LOGGER(const struct LOGGER* logger);
+static inline void     UNREGISTER_LOGGER(const struct LOGGER* logger);
+static inline void     UNREGISTER_ALL_LOGGERS();
+static inline BOOL     IS_LOGGER_REGISTERED(const struct LOGGER* logger);
 
 // Logger buffer manager
-static struct   LOGGER BUFFERS[sizeof(struct LOGGER) * 100];
+static struct   LOGGER BUFFERS[100];
 static int      BUFFER_COUNT;
 static int      BUFFER_SIZE;
 
 // Define a logger instance
-static struct LOGGER INIT_LOGGER(const char* name, const char* root_dir, const char* file_name, const BOOL debug) {
+static inline struct LOGGER INIT_LOGGER(const char* name, const char* root_dir, const char* file_name, const BOOL debug) {
     // Get the absolute path of logger
-    char log_file[100] = "";
-    strcat(log_file, root_dir);
-
-    if (root_dir[strlen(root_dir) - 1] != '\\' || root_dir[strlen(root_dir) - 1] != '/') {
-        strcat(log_file, "/");
-    }
-
-    strcat(log_file, file_name);
+    char log_file[4096] = "";
+    snprintf(log_file, sizeof(log_file), "%s/%s", root_dir, file_name);
 
     // create the root directory
     MKDIR(root_dir);
@@ -152,79 +147,79 @@ static struct LOGGER INIT_LOGGER(const char* name, const char* root_dir, const c
         exit(EXIT_FAILURE); // exit logger if failed to create logger file
     }
 
-    // update the logger initialization time
-    ctime(&logger.start_time);
+    char time_buf[100];
+    GET_CURRENT_DATE_TIME(time_buf, sizeof(time_buf));
 
-    fprintf(logger.file, ">>> Logger %s initiated at %s <<<\n", name, GET_CURRENT_DATE_TIME());
-    printf("%s>>> Logger %s initiated at %s <<< %s\n", CYAN, name, GET_CURRENT_DATE_TIME(), RESET);
+    fprintf(logger.file, ">>> Logger %s initiated at %s <<<\n", name, time_buf);
+    printf("%s>>> Logger %s initiated at %s <<< %s\n", CYAN, name, time_buf, RESET);
 
     // Register the logger to BUF_MANAGER
-    REGISTER_LOGGER(logger);
+    REGISTER_LOGGER(&logger);
     return logger;
 };
 
 // Check if the logger is active
-static BOOL IS_LOGGER_ACTIVE(const struct LOGGER logger) {
-    return logger.file != NULL;
+static inline BOOL IS_LOGGER_ACTIVE(const struct LOGGER* logger) {
+    return logger != NULL && logger->file != NULL;
 }
 
 // Log method to save and print the log
-static void LOG(const struct LOGGER logger, const char* message, const enum LEVEL level, const BOOL debug_once) {
+static inline void LOG(struct LOGGER* logger, const char* message, const enum LEVEL level, const BOOL debug_once) {
     if (!IS_LOGGER_ACTIVE(logger)) {
         PRINT_LOG("FAILED: No active logger is running, please initiate logger", ERROR);
         exit(EXIT_FAILURE);
     }
 
-    if (logger.debug || debug_once) {
-        PRINT_LOG(message, level);
+    char time_buf[100];
+    GET_CURRENT_DATE_TIME(time_buf, sizeof(time_buf));
+
+    if (logger->debug || debug_once) {
+        PRINT_LOG_WITH_TIME(message, level, time_buf);
     }
 
-    fprintf(logger.file, "%s %s %s\n", GET_CURRENT_DATE_TIME(), GET_LOGGER_LEVEL_STRING(level), message);
+    fprintf(logger->file, "%s %s %s\n", time_buf, GET_LOGGER_LEVEL_STRING(level), message);
+
+    // Update log counters
+    logger->log_count++;
+    logger->level[level].count++;
 }
 
 // Print the log to console with colored text
-static void PRINT_LOG(const char* message, const enum LEVEL level) {
+static inline void PRINT_LOG(const char* message, const enum LEVEL level) {
+    char time_buf[100];
+    GET_CURRENT_DATE_TIME(time_buf, sizeof(time_buf));
+    PRINT_LOG_WITH_TIME(message, level, time_buf);
+}
+
+// Print the log to console with provided time string
+static inline void PRINT_LOG_WITH_TIME(const char* message, const enum LEVEL level, const char* time_buf) {
     const char* color = NULL;
 
     switch (level) {
-        case DEBUG:
-            color = GREEN;
-            break;
-        case INFO:
-            color = CYAN;
-            break;
-        case WARNING:
-            color = YELLOW;
-            break;
-        case ERROR:
-            color = ORANGE;
-            break;
-        case FATAL:
-            color = RED;
-            break;
-        case MESSAGE:
-            color = BLUE;
-            break;
-        default:
-            color = WHITE;
-            break;
+        case DEBUG:   color = GREEN;  break;
+        case INFO:    color = CYAN;   break;
+        case WARNING: color = YELLOW; break;
+        case ERROR:   color = ORANGE; break;
+        case FATAL:   color = RED;    break;
+        case MESSAGE: color = BLUE;   break;
+        default:      color = WHITE;  break;
     }
 
-    printf("%s%s %s %s%s\n", color, GET_CURRENT_DATE_TIME(), GET_LOGGER_LEVEL_STRING(level), message, RESET);
+    printf("%s%s %s %s%s\n", color, time_buf, GET_LOGGER_LEVEL_STRING(level), message, RESET);
 }
 
 // Get the total logs count
-static int GET_LOGGER_LOG_COUNT(const struct LOGGER logger) {
-    return logger.log_count;
+static inline int GET_LOGGER_LOG_COUNT(const struct LOGGER* logger) {
+    return logger->log_count;
 }
 
 // Get the total specific level count
-static int GET_LOGGER_LEVEL_COUNT(const struct LOGGER logger, const enum LEVEL level) {
-    return logger.level[level].count;
+static inline int GET_LOGGER_LEVEL_COUNT(const struct LOGGER* logger, const enum LEVEL level) {
+    return logger->level[level].count;
 }
 
 // Get the specific level in string
-static char* GET_LOGGER_LEVEL_STRING(const enum LEVEL level) {
+static inline char* GET_LOGGER_LEVEL_STRING(const enum LEVEL level) {
     switch (level) {
         case DEBUG:
             return "DEBUG";
@@ -244,31 +239,34 @@ static char* GET_LOGGER_LEVEL_STRING(const enum LEVEL level) {
 }
 
 // Display available log levels
-static void DISPLAY_LOGGER_LEVELS(const struct LOGGER logger) {
+static inline void DISPLAY_LOGGER_LEVELS(const struct LOGGER* logger) {
     for (int i = 0; i < 7; i++) {
-        printf("%s%s%s\n", logger.level[i].color, GET_LOGGER_LEVEL_STRING(logger.level[i].level), RESET);
+        printf("%s%s%s\n", logger->level[i].color, GET_LOGGER_LEVEL_STRING(logger->level[i].level), RESET);
     }
 }
 
 // Get the logger starting time
-static time_t GET_LOGGER_START_TIME(const struct LOGGER logger) {
-    return logger.start_time;
+static inline time_t GET_LOGGER_START_TIME(const struct LOGGER* logger) {
+    return logger->start_time;
 }
 
 // Get the logger exit time
-static time_t GET_LOGGER_END_TIME(const struct LOGGER logger) {
+static inline time_t GET_LOGGER_END_TIME(const struct LOGGER* logger) {
     if (IS_LOGGER_ACTIVE(logger))
-        return logger.end_time;
+        return logger->end_time;
     return time(NULL);
 }
 
 // exit the logger
-static void EXIT_LOGGER(struct LOGGER* logger) {
-    if (IS_LOGGER_ACTIVE(*logger)) {
-        ctime(&logger->end_time);
-        fprintf(logger->file, ">>> Logger %s exited at %s <<<\n", logger->name, GET_CURRENT_DATE_TIME());
-        printf("%s>>> Logger %s exited at %s <<<%s\n", CYAN, logger->name, GET_CURRENT_DATE_TIME(), RESET);
-        UNREGISTER_LOGGER(*logger);      // unregister logger from buffer manager
+static inline void EXIT_LOGGER(struct LOGGER* logger) {
+    if (IS_LOGGER_ACTIVE(logger)) {
+        char time_buf[100];
+        GET_CURRENT_DATE_TIME(time_buf, sizeof(time_buf));
+
+        logger->end_time = time(NULL);
+        fprintf(logger->file, ">>> Logger %s exited at %s <<<\n", logger->name, time_buf);
+        printf("%s>>> Logger %s exited at %s <<<%s\n", CYAN, logger->name, time_buf, RESET);
+        UNREGISTER_LOGGER(logger);      // unregister logger from buffer manager
         fclose(logger->file);
         logger->file = NULL;
     } else {
@@ -277,22 +275,18 @@ static void EXIT_LOGGER(struct LOGGER* logger) {
 }
 
 // Get the current date and time
-static char* GET_CURRENT_DATE_TIME() {
-    char* buf = (char*)malloc(sizeof(char) + 100);
+static inline void GET_CURRENT_DATE_TIME(char* buf, size_t size) {
     time_t current_time;
 
     time(&current_time);
     const struct tm *local_time = localtime(&current_time);
-    strftime(buf, 100, "%d-%m-%Y %H:%M:%S", local_time);
-
-    return buf;
+    strftime(buf, size, "%d-%m-%Y %H:%M:%S", local_time);
 }
 
 // Check if the logger has already registered to the register
-static BOOL IS_LOGGER_REGISTERED(const struct LOGGER logger) {
-    for (int i = 0; i < BUFFER_COUNT / 2; i++)
-        if ((BUFFERS[i].file_name != NULL && strcmp(BUFFERS[i].file_name, logger.file_name) == 0) ||
-            (BUFFERS[BUFFER_COUNT-i-1].file_name != NULL && strcmp(BUFFERS[BUFFER_COUNT-i-1].file_name, logger.file_name) == 0)) {
+static inline BOOL IS_LOGGER_REGISTERED(const struct LOGGER* logger) {
+    for (int i = 0; i < BUFFER_COUNT; i++)
+        if (BUFFERS[i].file_name != NULL && strcmp(BUFFERS[i].file_name, logger->file_name) == 0) {
             return TRUE;
         }
 
@@ -300,10 +294,10 @@ static BOOL IS_LOGGER_REGISTERED(const struct LOGGER logger) {
 }
 
 // Register the Logger buffer
-static void REGISTER_LOGGER(const struct LOGGER logger) {
+static inline void REGISTER_LOGGER(const struct LOGGER* logger) {
     // check if the buffer already exists in the register
     if (!IS_LOGGER_REGISTERED(logger)) {
-        BUFFERS[BUFFER_COUNT++] = logger;
+        BUFFERS[BUFFER_COUNT++] = *logger;
         BUFFER_SIZE++;
         PRINT_LOG("[BUF_MANAGER]: Logger has been registered to BUF_MANAGER", DEBUG);
         return;
@@ -313,26 +307,13 @@ static void REGISTER_LOGGER(const struct LOGGER logger) {
 }
 
 // Unregister the logger from buffer manager
-static void UNREGISTER_LOGGER(const struct LOGGER logger) {
+static inline void UNREGISTER_LOGGER(const struct LOGGER* logger) {
     // figure out the position of the logger to be removed
     int position = -1;
 
-    // Avoid looping if the only one logger is registered
-    if (BUFFER_COUNT == 1 && strcmp(BUFFERS[0].file_name, logger.file_name) == 0) {
-        BUFFERS[0].file_name = NULL;
-        BUFFER_SIZE--;
-        PRINT_LOG("[BUF_MANAGER]: Logger was unregistered successfully", DEBUG);
-        return;
-    }
-
-    for (int i = 0; i <= BUFFER_COUNT / 2; i++) {
-        if (BUFFERS[i].file_name != NULL && strcmp(BUFFERS[i].file_name, logger.file_name) == 0) {
+    for (int i = 0; i < BUFFER_COUNT; i++) {
+        if (BUFFERS[i].file_name != NULL && strcmp(BUFFERS[i].file_name, logger->file_name) == 0) {
             position = i;
-            break;
-        }
-
-        if (BUFFERS[BUFFER_COUNT-i-1].file_name != NULL && strcmp(BUFFERS[BUFFER_COUNT-i-1].file_name, logger.file_name) == 0) {
-            position = BUFFER_COUNT-i-1;
             break;
         }
     }
@@ -342,28 +323,19 @@ static void UNREGISTER_LOGGER(const struct LOGGER logger) {
         return;
     }
 
-    // unregister the logger
-    BUFFERS[position].file_name = NULL;
+    // unregister the logger by shifting elements
+    for (int i = position; i < BUFFER_COUNT - 1; i++) {
+        BUFFERS[i] = BUFFERS[i + 1];
+    }
+    BUFFER_COUNT--;
     BUFFER_SIZE--;
     PRINT_LOG("[BUF_MANAGER]: Logger was unregistered successfully", DEBUG);
 }
 
 // Unregister all the running loggers
-static void UNREGISTER_ALL_LOGGERS() {
-    for (int i = 0; i < BUFFER_COUNT / 2; i++) {
-        if (BUFFERS[i].file_name != NULL) {
-            BUFFERS[i].file_name = NULL;
-            EXIT_LOGGER(&BUFFERS[i]);
-            BUFFER_SIZE--;
-            PRINT_LOG("[BUF_MANAGER]: Unregistered logger successfully", DEBUG);
-        }
-
-        if (BUFFERS[BUFFER_COUNT-i-1].file_name != NULL) {
-            BUFFERS[BUFFER_COUNT-i-1].file_name = NULL;
-            EXIT_LOGGER(&BUFFERS[BUFFER_COUNT-i-1]);
-            BUFFER_SIZE--;
-            PRINT_LOG("[BUF_MANAGER]: Unregistered logger successfully", DEBUG);
-        }
+static inline void UNREGISTER_ALL_LOGGERS() {
+    while (BUFFER_COUNT > 0) {
+        EXIT_LOGGER(&BUFFERS[0]);
     }
 }
 

@@ -14,10 +14,14 @@
 
 int main(const int argc, char *argv[]) {
     const char* app_name    = "app";
-    char *root_dir          = getcwd(NULL, 100);    // Insert absolute path of project root ex:/home/.../cache
+    char root_dir[4096];
+    if (getcwd(root_dir, sizeof(root_dir)) == NULL) {
+        perror("getcwd() error");
+        return 1;
+    }
     const char* file_name   = "test_logger.log";    // Insert the file name of log file ex: test_logger.log
 
-    strcat(root_dir, "/cache"); // Append logs directory to root directory
+    strncat(root_dir, "/cache", sizeof(root_dir) - strlen(root_dir) - 1); // Append logs directory to root directory
     struct LOGGER logger  = INIT_LOGGER(app_name, root_dir, file_name, TRUE);
 
     /*
@@ -28,12 +32,12 @@ int main(const int argc, char *argv[]) {
         @param3: enum LEVEL level       => Log level
         @param4: BOOL debug_once        => Debug only once even if global debug is disabled
     */
-    LOG(logger, "Error log",    ERROR,      FALSE);
-    LOG(logger, "Info log",     INFO,       FALSE);
-    LOG(logger, "Warning log",  WARNING,    FALSE);
-    LOG(logger, "Debug log",    DEBUG,      FALSE);
-    LOG(logger, "Message log",  INFO,       FALSE);
-    LOG(logger, "Unknown log",  UNKNOWN,    FALSE);
+    LOG(&logger, "Error log",    ERROR,      FALSE);
+    LOG(&logger, "Info log",     INFO,       FALSE);
+    LOG(&logger, "Warning log",  WARNING,    FALSE);
+    LOG(&logger, "Debug log",    DEBUG,      FALSE);
+    LOG(&logger, "Message log",  INFO,       FALSE);
+    LOG(&logger, "Unknown log",  UNKNOWN,    FALSE);
 
     EXIT_LOGGER(&logger);
     return 0;
