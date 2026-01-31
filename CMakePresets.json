@@ -2,24 +2,46 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "clogger-win32",
+            "name": "win32-debug",
             "hidden": false,
             "description": "CLogger Project Configuration for Windows System",
             "generator": "MinGW Makefiles",
-            "binaryDir": "${sourceDir}/out",
+            "binaryDir": "${sourceDir}/out/${presetName}",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
             }
         },
         {
-            "name": "clogger-unix",
+            "name": "win32-release",
+            "hidden": false,
+            "description": "CLogger Project Configuration for Windows System",
+            "generator": "MinGW Makefiles",
+            "binaryDir": "${sourceDir}/out/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+            }
+        },
+        {
+            "name": "unix-debug",
             "hidden": false,
             "description": "CLogger Project Configuration for Unix System",
             "generator": "Unix Makefiles",
-            "binaryDir": "${sourceDir}/out",
+            "binaryDir": "${sourceDir}/out/${presetName}",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+            }
+        },
+        {
+            "name": "unix-release",
+            "hidden": false,
+            "description": "CLogger Project Configuration for Unix System",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/out/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
             }
         }
