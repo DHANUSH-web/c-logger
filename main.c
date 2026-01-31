@@ -17,7 +17,7 @@ int main(const int argc, char *argv[]) {
     char *root_dir          = getcwd(NULL, 100);    // Insert absolute path of project root ex:/home/.../cache
     const char* file_name   = "test_logger.log";    // Insert the file name of log file ex: test_logger.log
 
-    strcat(root_dir, "/cache"); // Append logs directory to root directory
+    strcat(root_dir, "/logs"); // Append logs directory to root directory
     struct LOGGER logger  = INIT_LOGGER(app_name, root_dir, file_name, TRUE);
 
     /*
