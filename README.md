@@ -38,9 +38,37 @@ include_directories(logger)
 add_executable(... ... logger/logger.h)
 ```
 
-**Note:** You can also run a demo program inside logger `main.c` by running `build` script
+**Note:** You can also run a demo program inside logger `main.c` using the build script.
 
-In the terminal, run `./build.bat` if you are in Windows or else run `./build` on Linux or macOS
+Build the project using the provided script (on Linux or macOS run `./build`; on Windows run `./build.bat`):
+
+```bash
+# For only building
+./build build           # builds in debug by default [RECOMMENDED]
+./build build --debug   # builds in debug preset
+./build build --release # builds in release preset
+./build build --all     # builds both debug and release preset
+# For build and run
+./build run             # runs in debug by default [RECOMMENDED]
+./build run --debug     # runs in debug preset
+./build run --release   # runs in release preset
+```
+
+This will:
+- Create a build directory
+- Configure CMake with the default preset
+- Build the project
+- Run the executable (when using `run`)
+
+Clean the project:
+
+```bash
+./build clean           # cleans the entire build [RECOMMENDED]
+./build clean --debug   # cleans only debug build
+./build clean --release # cleans only release build
+```
+
+**Note**: Use `./build help` to learn more about `./build` command usage
 
 ## Quick Start
 

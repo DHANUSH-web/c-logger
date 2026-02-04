@@ -21,7 +21,7 @@ int main(const int argc, char *argv[]) {
     }
     const char* file_name   = "test_logger.log";    // Insert the file name of log file ex: test_logger.log
 
-    strncat(root_dir, "/cache", sizeof(root_dir) - strlen(root_dir) - 1); // Append logs directory to root directory
+    strncat(root_dir, "/logs", sizeof(root_dir) - strlen(root_dir) - 1); // Append logs directory to root directory
     struct LOGGER logger  = INIT_LOGGER(app_name, root_dir, file_name, TRUE);
 
     /*
