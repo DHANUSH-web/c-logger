@@ -1,3 +1,10 @@
+/*
+ *  ************************************************************************
+ *  Copyright (c) since 2025, Dhanush H V. All rights reserved.
+ *  Licensed under the MIT License. See the LICENSE file for more details
+ *  *************************************************************************
+ */
+
 // include headers
 #include "logger.h"
 #include "main.h"

@@ -1,3 +1,8 @@
+# ************************************************************************
+# Copyright (c) since 2025, Dhanush H V. All rights reserved.
+# Licensed under the MIT License. See the LICENSE file for more details
+# *************************************************************************
+
 cmake_minimum_required(VERSION 3.20)
 project(c-logger LANGUAGES C)
 
