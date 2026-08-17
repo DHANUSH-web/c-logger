@@ -22,29 +22,38 @@ Clone the repo directly from `https://github.com/DHANUSH-web/c-logger.git` into 
 **_For stable release_**
 
 ```sh
-git clone https://github.com/DHANUSH-web/c-logger.git
+git clone https://github.com/DHANUSH-web/c-logger.git extras/logger --recurse-submodules --depth 1
 ```
 
 **_For development release_**
 
 ```sh
-git clone -b dev https://github.com/DHANUSH-web/c-logger.git
+git clone https://github.com/DHANUSH-web/c-logger.git extras/logger --branch dev --recurse-submodules --depth 1
 ```
 
-If you are using `CMake` as build-system in your project, don't forget to include the logger inside `CMakeLists.txt`
+We are using `CMake` as build-system in your project, don't forget to include the logger inside `CMakeLists.txt`
 
 ```cmake
-include_directories(logger)
-add_executable(... ... logger/logger.h)
+add_exectuable(<TARGET> extras/logger/src/logger.c ...)
+target_include_directories(<TARGET> PRIVATE extras/logger/include ...)
 ```
 
-**Note:** You can also run a demo program inside logger `main.c` by running `build` script
+## Building
+There are two presets `debug` and `release` for CMake build. Replace `profile` with `debug` or `release` as per your requirements
 
-In the terminal, run `./build.bat` if you are in Windows or else run `./build` on Linux or macOS
+```sh
+# build
+cmake --preset profile
+cmake --build ./out/profile
+
+# run
+./out/profile/c-logger          # main target
+./out/profile/c-logger-tests    # test target
+```
 
 ## Quick Start
 
-Open `main.c` file inside logger and try to explore the code
+Open `src/main.c` file inside logger and try to explore the code
 
 ## Contributing
 

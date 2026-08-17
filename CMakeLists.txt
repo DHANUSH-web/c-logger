@@ -1,8 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
-project(c-logger VERSION 0.1.0 LANGUAGES C CXX)
-include_directories(".")
-set(CMAKE_C_STANDARD 11)
+project(c-logger LANGUAGES C)
 
-add_executable(clogger main.c
-    logger.h
-)
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED OFF)
+set(CMAKE_C_EXTENSIONS OFF)
+
+# main target
+add_executable(c-logger src/main.c src/logger.c)
+target_include_directories(c-logger PRIVATE include)
+
+# test target
+add_executable(c-logger-tests tests/test_logger.c src/logger.c extras/unity/src/unity.c)
+target_include_directories(c-logger-tests PRIVATE include extras/unity/src)
