@@ -1,18 +1,9 @@
-# Files
-.env*
-
-# Folders
-cache/
-out/
-cmake-build-debug/
-
-# Binaries
-*.exe
-*.deb
-*.dmg
-
-# Others
-.idea/
-.fleet/
+.cache/
 .vscode/
-.vs/
+.idea/
+
+logs/
+out/
+
+*.exe
+.env*
